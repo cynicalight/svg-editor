@@ -1,0 +1,7 @@
+node_modules/
+dist/
+*.log
+.DS_Store
+
+# 个人学习笔记 / AI 讲解，不进入版本库
+Agents.local.md
