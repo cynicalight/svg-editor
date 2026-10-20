@@ -35,4 +35,28 @@ export class EditorError extends Error {
   static nonPositiveScale(): EditorError {
     return new EditorError('scale factor must be positive');
   }
+
+  static containerIntoDescendant(id: string): EditorError {
+    return new EditorError(`cannot group a container into its own descendant: ${id}`);
+  }
+
+  static ungroupTopLevel(id: string): EditorError {
+    return new EditorError(`cannot ungroup top-level container: ${id}`);
+  }
+
+  static noDocument(): EditorError {
+    return new EditorError("no document. use 'init' or 'read' first");
+  }
+
+  static undoLocked(): EditorError {
+    return new EditorError('undo not allowed after io command');
+  }
+
+  static nothingToUndo(): EditorError {
+    return new EditorError('nothing to undo');
+  }
+
+  static nothingToRedo(): EditorError {
+    return new EditorError('nothing to redo');
+  }
 }

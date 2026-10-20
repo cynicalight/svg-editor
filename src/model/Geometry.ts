@@ -1,4 +1,5 @@
 import { EditorError } from './EditorError.js';
+import { Memento } from './Memento.js';
 
 /** 几何属性在平移时随哪个方向变化；length 类（宽高、半径）平移时不变。 */
 export type Axis = 'x' | 'y' | 'length';
@@ -36,6 +37,21 @@ export class Geometry {
   set(name: string, value: number): void {
     if (!this.has(name)) throw EditorError.unknownAttribute(name);
     this.values.set(name, value);
+  }
+
+  /** 第一个 x 轴属性与第一个 y 轴属性，即图形的"位置"，如 rect 的 (x,y)、circle 的 (cx,cy)。 */
+  anchor(): [number, number] {
+    const first = (axis: Axis) => [...this.axes].find(([, a]) => a === axis)?.[0];
+    const x = first('x');
+    const y = first('y');
+    return [x ? this.get(x) : 0, y ? this.get(y) : 0];
+  }
+
+  snapshot(): Memento {
+    const saved = new Map(this.values);
+    return new Memento(() => {
+      for (const [name, value] of saved) this.values.set(name, value);
+    });
   }
 
   translate(dx: number, dy: number): void {

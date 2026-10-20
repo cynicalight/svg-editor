@@ -1,6 +1,7 @@
 import type { Container } from './Container.js';
 import { EditorError } from './EditorError.js';
 import type { Group } from './Group.js';
+import { Memento } from './Memento.js';
 import { Paint } from './Paint.js';
 
 /**
@@ -55,6 +56,21 @@ export abstract class Shape {
     return [...this.ownAttributes(), ...this.paint.entries()];
   }
 
+  /** 图形的位置（叶子），容器没有自身位置时返回 null。 */
+  anchor(): [number, number] | null {
+    return null;
+  }
+
+  /** 保存以自身为根的子树的全部属性（不含树结构），用于撤销。 */
+  snapshot(): Memento {
+    return Memento.of([this.paint.snapshot(), this.snapshotOwn()]);
+  }
+
+  /** 以自身为根的子树，先序遍历（即文档顺序）。 */
+  flatten(): Shape[] {
+    return [this];
+  }
+
   /** 安全式 Composite：只有容器返回自身，叶子返回 null。 */
   asGroup(): Group | null {
     return null;
@@ -81,4 +97,6 @@ export abstract class Shape {
   protected abstract setOwnAttribute(name: string, value: string): void;
 
   protected abstract ownAttributes(): Array<[string, string]>;
+
+  protected abstract snapshotOwn(): Memento;
 }

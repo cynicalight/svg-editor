@@ -1,5 +1,6 @@
 import { ChildList } from './ChildList.js';
 import type { Container } from './Container.js';
+import { Memento } from './Memento.js';
 import { Shape } from './Shape.js';
 
 /**
@@ -54,6 +55,10 @@ export class Group extends Shape implements Container {
     return null;
   }
 
+  override flatten(): Shape[] {
+    return [this, ...this.children.flatMap((child) => child.flatten())];
+  }
+
   override contains(other: Shape): boolean {
     return this === other || this.children.some((child) => child.contains(other));
   }
@@ -75,5 +80,9 @@ export class Group extends Shape implements Container {
 
   protected override ownAttributes(): Array<[string, string]> {
     return [];
+  }
+
+  protected override snapshotOwn(): Memento {
+    return Memento.of(this.children.map((child) => child.snapshot()));
   }
 }

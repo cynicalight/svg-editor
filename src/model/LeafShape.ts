@@ -1,4 +1,5 @@
 import type { Geometry } from './Geometry.js';
+import type { Memento } from './Memento.js';
 import { NumberFormat } from './NumberFormat.js';
 import { Shape } from './Shape.js';
 
@@ -12,6 +13,10 @@ export abstract class LeafShape extends Shape {
 
   override scale(factor: number): void {
     this.geometry.scale(factor);
+  }
+
+  override anchor(): [number, number] {
+    return this.geometry.anchor();
   }
 
   /** 按名读取几何数值，供视图层排版使用。 */
@@ -33,5 +38,9 @@ export abstract class LeafShape extends Shape {
 
   protected override ownAttributes(): Array<[string, string]> {
     return this.geometry.names().map((name) => [name, NumberFormat.format(this.geometry.get(name))]);
+  }
+
+  protected override snapshotOwn(): Memento {
+    return this.geometry.snapshot();
   }
 }

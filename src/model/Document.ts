@@ -48,6 +48,11 @@ export class Document {
     if (this.find(id)) throw EditorError.idExists(id);
   }
 
+  /** 全部图形，按文档顺序（先序遍历）。 */
+  all(): Shape[] {
+    return this.canvas.children.flatMap((shape) => shape.flatten());
+  }
+
   count(): number {
     return this.canvas.children.reduce((sum, shape) => sum + shape.count(), 0);
   }

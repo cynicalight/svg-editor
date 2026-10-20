@@ -1,5 +1,6 @@
 import { Geometry } from './Geometry.js';
 import { LeafShape } from './LeafShape.js';
+import { Memento } from './Memento.js';
 
 /** 文字：位置是几何属性，内容是 SVG 子文本而非属性，但可通过 set <id> text 修改。 */
 export class Text extends LeafShape {
@@ -33,5 +34,10 @@ export class Text extends LeafShape {
     } else {
       super.setOwnAttribute(name, value);
     }
+  }
+
+  protected override snapshotOwn(): Memento {
+    const body = this.body;
+    return Memento.of([super.snapshotOwn(), new Memento(() => (this.body = body))]);
   }
 }
