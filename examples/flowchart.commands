@@ -1,0 +1,17 @@
+# Run from the project directory: npm run cli < examples/flowchart.commands
+init 800 600
+create g flowchart
+create g n1 in flowchart
+create rect start 120 100 160 60 #4a90d9 in n1
+create text start-label 155 135 "开始" in n1
+create g n2 in flowchart
+create rect process 520 100 160 60 #f5a623 in n2
+create text process-label 545 135 "处理数据" in n2
+create line arrow1 280 130 520 130 black in flowchart
+move n2 0 100
+undo
+redo
+set process-label text "处理数据 v2"
+tree
+show process
+save flowchart.svg
