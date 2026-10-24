@@ -32,6 +32,19 @@ export class EditorError extends Error {
     return new EditorError(`invalid number: ${text}`);
   }
 
+  static unknownShapeType(type: string): EditorError {
+    return new EditorError(`unknown shape type: ${type} (is the plugin loaded?)`);
+  }
+
+  static missingShapeId(): EditorError {
+    return new EditorError('shape id is required');
+  }
+
+  static invalidShapeParameters(type: string, minimum: number, maximum: number): EditorError {
+    const count = minimum === maximum ? `${minimum}` : `${minimum}-${maximum}`;
+    return new EditorError(`invalid parameters for ${type}: expected ${count} arguments`);
+  }
+
   static nonPositiveScale(): EditorError {
     return new EditorError('scale factor must be positive');
   }
