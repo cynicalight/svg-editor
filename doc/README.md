@@ -15,7 +15,7 @@ npm run cli
 npm run cli < examples/flowchart.commands
 ```
 
-示例在当前目录生成 `flowchart.svg`，可用浏览器手动打开。仓库也提供同一脚本生成的 [预览文件](../examples/flowchart.svg)。核对两个节点及中文标签，并确认第二个节点已下移 100 px、标签变为“处理数据 v2”。这是人工检查步骤，尚未代替用户完成浏览器视觉验收。
+示例在当前目录生成 `flowchart.svg`，可用浏览器手动打开。仓库也提供同一脚本生成的 [预览文件](../examples/flowchart.svg)。核对两个节点及中文标签，并确认第二个节点已下移 100 px、标签变为“处理数据 v2”。2026-10-24，用户打开该文件后确认继续，人工预览环节已确认。
 
 双引号包住含空格的内容或路径；引号内支持 `\\` 和 `\"` 转义，其余反斜线原样保留。只将整行开头的 `#` 视为注释，颜色值 `#ffffff` 可直接输入。管道输入不显示提示符，命令严格按顺序完成后再读下一条。空白行和注释不产生输出；一条命令失败后会显示 `error:` 并继续。
 
@@ -166,7 +166,7 @@ Workspace 管理当前文档及 CommandHistory。init/read 换文档时清空旧
 
 ## 3. 一致性自查
 
-截至本轮验收，model、commands、io、view、cli 均已实现，main.ts 已接通各层。新增 SvgFileStore、SvgElement、XmlEscaper 已归入 io；新增 ShowRenderer 已归入 view。架构依赖测试通过，model 不引用 IO，io/view 不引用 commands/cli。CLI 注册表是方案允许的命令名分派，图形类型分派仍集中在 ShapeFactory；最终提交前还需人工预览及交付检查。
+截至本轮验收，model、commands、io、view、cli 均已实现，main.ts 已接通各层。新增 SvgFileStore、SvgElement、XmlEscaper 已归入 io；新增 ShowRenderer 已归入 view。架构依赖测试通过，model 不引用 IO，io/view 不引用 commands/cli。CLI 注册表是方案允许的命令名分派，图形类型分派仍集中在 ShapeFactory；用户已确认示例预览；最终版本以远程 `final` 标签标识。
 
 ## 4. 质量保证手段
 
@@ -174,14 +174,14 @@ Workspace 管理当前文档及 CommandHistory。init/read 换文档时清空旧
 
 SVG 测试覆盖需求第 6 节的 other.svg、自动 id 与显式 id 冲突、六种元素往返、XML 转义与文字空白、非法 XML、重复 id、未知属性、文件保存与失败保护。视图测试核对 tree 连接线、子树、show 属性和渲染不修改模型。
 
-CLI 测试覆盖分词、全部命令的调用、参数错误、缺少文档、IO 成败与历史状态、EOF 和终端提示符。真实 Node 子进程回放包含 save/read 的流程，验证异步顺序和落盘 SVG。类型检查及构建通过。浏览器人工预览和最终提交检查仍待完成。
+CLI 测试覆盖分词、全部命令的调用、参数错误、缺少文档、IO 成败与历史状态、EOF 和终端提示符。真实 Node 子进程回放包含 save/read 的流程，验证异步顺序和落盘 SVG。类型检查及构建通过。用户已确认浏览器预览。交付使用 `main` 与附注标签 `final`，推送后核对两者指向同一提交。
 
 
 ### 需求核对表
 
 | 原需求 | 实现与验证依据 | 结果 |
 |---|---|---|
-| 第 1 节：分步 Git 提交 | 脚手架、模型、命令、工厂、IO、CLI 分步提交；`git log --oneline` 可检查 | 本地记录具备；最终远程交付待完成 |
+| 第 1 节：分步 Git 提交 | 脚手架、模型、命令、工厂、IO、CLI 分步提交；`git log --oneline` 可检查 | 分步提交记录具备；随 main 与 final 交付 |
 | 第 1 节：doc/README.md 四类内容 | 本文架构方案、过程记录、一致性自查、质量保证 | 已补齐 |
 | 第 2 节：面向对象与依赖规则 | 类与文件对应；模型无 IO；类型分派集中于工厂，命令分派集中于 CLI | 自动架构检查通过 |
 | 第 2 节：提示符、注释、引号、错误 | Tokenizer、Repl、CLI 测试 | 自动检查通过 |
@@ -190,8 +190,8 @@ CLI 测试覆盖分词、全部命令的调用、参数错误、缺少文档、I
 | 第 4.3 节：撤销重做与 IO 边界 | history 测试、失败原子性回归、真实进程 save/read | 自动检查通过 |
 | 第 5 节：tree/show | 完整树、子树、父级、属性、文字与空文档测试 | 自动检查通过 |
 | 第 6 节：示例 SVG 与会话 | other.svg 的 7 元素解析、缺 id 警告；典型编辑会话与 8 元素流程图脚本 | 自动检查通过 |
-| SVG 浏览器显示 | examples/flowchart.svg，核对两个节点、中文与右侧下移 | 待人工确认 |
-| 最终远程提交及 final 标签 | 对照实际提交哈希与远程标签 | 待完成；尚未标记最终交付 |
+| SVG 浏览器显示 | examples/flowchart.svg，核对两个节点、中文与右侧下移 | 用户已确认（2026-10-24） |
+| 最终远程提交及 final 标签 | 对照实际提交哈希与远程标签 | 交付引用为 main 与 final；推送后核对远端提交一致 |
 
 `box` 属后续插件阶段，本轮不实现。复合 box 的专属 ungroup 错误也不属于当前普通 g 的验收范围。外部 SVG 支持范围见第 6 步记录；带 transform 或 CSS 的文件会明确报错。这是已知兼容性限制，不能据此声称支持任意外部 SVG。
 
@@ -205,4 +205,4 @@ npm run build
 npm run cli < examples/flowchart.commands
 ```
 
-自动检查结果记录于 2026-10-24。浏览器显示、课程截止时间及课程平台提交入口尚未核实；测试通过不替代这些交付步骤。
+自动检查结果记录于 2026-10-24。用户已确认示例预览。课程截止时间及课程平台提交入口尚未核实；Git 仓库交付不替代课程平台提交。
