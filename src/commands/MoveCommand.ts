@@ -20,7 +20,12 @@ export class MoveCommand implements EditCommand {
 
   execute(): string {
     this.before = this.shape.snapshot();
-    this.shape.move(this.dx, this.dy);
+    try {
+      this.shape.move(this.dx, this.dy);
+    } catch (error) {
+      this.before.restore();
+      throw error;
+    }
     return `${this.shape.label()} ${this.describe('moved to', this.dx, this.dy)}`;
   }
 

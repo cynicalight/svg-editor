@@ -36,6 +36,7 @@ export class Geometry {
 
   set(name: string, value: number): void {
     if (!this.has(name)) throw EditorError.unknownAttribute(name);
+    if (!Number.isFinite(value)) throw EditorError.invalidNumber(String(value));
     this.values.set(name, value);
   }
 
@@ -55,15 +56,23 @@ export class Geometry {
   }
 
   translate(dx: number, dy: number): void {
+    const updated = new Map<string, number>();
     for (const [name, axis] of this.axes) {
       const delta = axis === 'x' ? dx : axis === 'y' ? dy : 0;
-      this.values.set(name, this.get(name) + delta);
+      const value = this.get(name) + delta;
+      if (!Number.isFinite(value)) throw EditorError.invalidNumber(String(value));
+      updated.set(name, value);
     }
+    for (const [name, value] of updated) this.values.set(name, value);
   }
 
   scale(factor: number): void {
+    const updated = new Map<string, number>();
     for (const name of this.axes.keys()) {
-      this.values.set(name, this.get(name) * factor);
+      const value = this.get(name) * factor;
+      if (!Number.isFinite(value)) throw EditorError.invalidNumber(String(value));
+      updated.set(name, value);
     }
+    for (const [name, value] of updated) this.values.set(name, value);
   }
 }

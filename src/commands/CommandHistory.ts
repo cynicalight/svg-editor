@@ -19,15 +19,17 @@ export class CommandHistory {
   }
 
   undo(): string {
-    const command = this.take(this.undoStack, EditorError.nothingToUndo());
+    const command = this.peek(this.undoStack, EditorError.nothingToUndo());
     const summary = command.undo();
+    this.undoStack.pop();
     this.redoStack.push(command);
     return summary;
   }
 
   redo(): string {
-    const command = this.take(this.redoStack, EditorError.nothingToRedo());
+    const command = this.peek(this.redoStack, EditorError.nothingToRedo());
     const summary = command.execute();
+    this.redoStack.pop();
     this.undoStack.push(command);
     return summary;
   }
@@ -44,9 +46,9 @@ export class CommandHistory {
     this.lock();
   }
 
-  private take(stack: EditCommand[], whenEmpty: EditorError): EditCommand {
+  private peek(stack: EditCommand[], whenEmpty: EditorError): EditCommand {
     if (this.locked) throw EditorError.undoLocked();
-    const command = stack.pop();
+    const command = stack.at(-1);
     if (!command) throw whenEmpty;
     return command;
   }

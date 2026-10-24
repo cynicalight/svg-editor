@@ -20,7 +20,12 @@ export class ScaleCommand implements EditCommand {
 
   execute(): string {
     this.before = this.shape.snapshot();
-    this.shape.scale(this.factor);
+    try {
+      this.shape.scale(this.factor);
+    } catch (error) {
+      this.before.restore();
+      throw error;
+    }
     return `${this.shape.label()} scaled by ${NumberFormat.format(this.factor)}`;
   }
 
