@@ -24,6 +24,18 @@ export class ShapeFactory {
     ['g', { constructor: Group, required: [] }],
   ]);
 
+  /** XML 属性式入口与 CLI 位置参数式入口共用类型表。缺省几何值沿用模型的 0。 */
+  fromAttributes(type: string, id: string, attributes: ReadonlyMap<string, string>, text = ''): Shape {
+    const definition = this.definitions.get(type);
+    if (!definition) throw EditorError.unknownShapeType(type);
+    if (id.trim() === '') throw EditorError.missingShapeId();
+    const shape = new definition.constructor(id);
+    for (const [name, value] of attributes) shape.setAttribute(name, value);
+    if (shape.textContent !== null) shape.setAttribute('text', text);
+    else if (text.trim() !== '') throw new EditorError(`unexpected text in <${type}>`);
+    return shape;
+  }
+
   /** 参数已由外壳分词并去除 in 子句；返回未挂入文档的图形。 */
   create(type: string, id: string, params: readonly string[] = []): Shape {
     const definition = this.definitions.get(type);

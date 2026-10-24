@@ -20,6 +20,14 @@ export class Text extends LeafShape {
     return this.body;
   }
 
+  override get textContent(): string {
+    return this.body;
+  }
+
+  override geometrySummary(): string {
+    return `(${this.getAttribute('x')},${this.getAttribute('y')}) ${JSON.stringify(this.body)}`;
+  }
+
   protected override hasOwnAttribute(name: string): boolean {
     return name === Text.CONTENT || super.hasOwnAttribute(name);
   }

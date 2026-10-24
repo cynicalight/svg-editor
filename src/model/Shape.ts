@@ -34,6 +34,15 @@ export abstract class Shape {
     return `${this.type}#${this.id}`;
   }
 
+  /** 非文字图形没有子文本；序列化与视图无需按类型分派。 */
+  get textContent(): string | null {
+    return null;
+  }
+
+  geometrySummary(): string {
+    return this.ownAttributes().map(([name, value]) => `${name}=${value}`).join(' ');
+  }
+
   setAttribute(name: string, value: string): void {
     if (this.paint.has(name)) {
       this.paint.set(name, value);

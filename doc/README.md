@@ -27,9 +27,11 @@ package "commands" {
 package "io" {
   [SvgSerializer]
   [SvgParser]
+  [SvgFileStore]
 }
 package "view" {
   [TreeRenderer]
+  [ShowRenderer]
 }
 package "model" {
   [Shape]
@@ -42,6 +44,9 @@ package "model" {
 [EditCommand] --> [Document]
 [SvgSerializer] --> [Document]
 [SvgParser] --> [ShapeFactory]
+[SvgFileStore] --> [SvgParser]
+[SvgFileStore] --> [SvgSerializer]
+[ShowRenderer] --> [Shape]
 [TreeRenderer] --> [Shape]
 @enduml
 ```
@@ -88,7 +93,17 @@ cli ──► view ──────► model
 
 工厂只返回未加入文档的对象。CLI 后续负责分词和剥离 `in` 子句；`CreateCommand` 负责文档内 id 唯一性检查与插入，历史栈负责撤销重做。创建失败不会向文档插入部分初始化的图形。完整插件注册接口留到后续阶段。
 
-SVG 读入尚未实现；当前工厂接收位置参数，后续读入模块需要将 XML 属性适配到创建入口，或在工厂内增加属性式入口，并复用同一类型表。
+第 6 步已新增 `fromAttributes` 属性式入口，SVG 读入与 CLI 创建共用同一类型表。
+
+### 第 6 步：SVG 与文本视图
+
+`SvgParser` 使用 [saxes](https://github.com/lddubeau/saxes) 处理 XML 语法、实体、命名空间和结构错误。该依赖版本锁定为 6.0.0（上游已归档）；本项目不加载 DTD 或外部实体。解析先构造临时 XML 树并收集所有显式 id，再生成缺失 id，最后构造独立 Document。重复 id 或非法输入导致整次解析失败，调用方仅在成功后切换工作区。
+
+`SvgSerializer` 递归访问属性、子节点和 `textContent`，负责 XML 转义。`SvgFileStore` 负责文件系统，成功读写后才更新路径；保存使用同目录临时文件和 rename，失败时清理临时文件。历史栈与 IO 相互独立，后续 CLI 在成功保存后锁定历史，在成功读入后调用 Workspace.open。
+
+`TreeRenderer` 和 `ShowRenderer` 只读模型。这里选择多态方法而未引入 Visitor：`textContent` 提供文字，`geometrySummary` 提供简短几何描述；视图负责连接线、缩进和分行。模型保留少量纯文本表示，避免在视图中按图形类型分派。如果未来需要多种输出风格，再评估 Visitor 的维护成本。
+
+支持边界：六种内置元素、几何与外观白名单、文字、嵌套 g、缺失 id 自动补名、data-kind 容器降级。画布尺寸使用正数 px 数值（不带单位），缺省为 800×600；viewBox 仅接受与画布相同的 `0 0 width height`。本轮没有实现通用 SVG 导入：transform、CSS、字体属性、路径、非匹配 viewBox 等会报错，不会静默丢弃。作业背景中的带 transform 示例尚不支持，后续若要求导入这一示例，需要补充变换及文字尺寸的保留方案。
 
 ### 修订记录
 
@@ -96,13 +111,16 @@ SVG 读入尚未实现；当前工厂接收位置参数，后续读入模块需�
 |---|---|---|
 | 2026-10-19 | 初版架构方案 | — |
 | 2026-10-24 | 实现 ShapeFactory；将 id 索引描述修正为遍历查找 | 与现有模型保持一致，明确工厂与命令的责任边界 |
+| 2026-10-24 | 实现 SVG IO、tree/show 与属性式工厂入口 | 复用模型多态，明确外部 SVG 支持边界 |
 
 ## 3. 一致性自查
 
-_（实现完成后填写）_
+截至第 6 步，model、commands、io、view 已实现，cli 仍待实现。新增 SvgFileStore、SvgElement、XmlEscaper 已归入 io；新增 ShowRenderer 已归入 view。架构依赖测试通过，model 不引用 IO，io/view 不引用 commands/cli。最终检查将在 CLI 接通后补充。
 
 ## 4. 质量保证手段
 
-截至第 5 步，`npm test` 的 64 个测试通过，`npm run typecheck` 通过。工厂测试覆盖六种类型、浮点与负坐标、可选颜色、含空格及空字符串的文字、未知类型、空 id、参数数量与非法数字。集成测试验证工厂产物进入容器后的撤销重做，以及创建失败不改变文档或破坏 redo 历史。
+截至第 6 步，`npm test` 的 94 个测试通过，`npm run typecheck` 通过。工厂测试覆盖六种类型、浮点与负坐标、可选颜色、含空格及空字符串的文字、未知类型、空 id、参数数量与非法数字。集成测试验证工厂产物进入容器后的撤销重做，以及创建失败不改变文档或破坏 redo 历史。
 
-这些检查覆盖已实现的模型、命令与工厂；SVG 读写、显示和 CLI 尚未实现，最终功能完整性仍需后续验收。
+SVG 测试覆盖需求第 6 节的 other.svg、自动 id 与显式 id 冲突、六种元素往返、XML 转义与文字空白、非法 XML、重复 id、未知属性、文件保存与失败保护。视图测试核对 tree 连接线、子树、show 属性和渲染不修改模型。
+
+这些检查覆盖模型、命令、工厂、SVG 与显示模块；CLI 尚未接通，最终端到端验收和浏览器人工预览仍待完成。

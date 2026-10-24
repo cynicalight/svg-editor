@@ -12,4 +12,8 @@ export class Rect extends LeafShape {
   override get type(): string {
     return 'rect';
   }
+
+  override geometrySummary(): string {
+    return `x=${this.getAttribute('x')} y=${this.getAttribute('y')} w=${this.getAttribute('width')} h=${this.getAttribute('height')}`;
+  }
 }

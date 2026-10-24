@@ -12,4 +12,8 @@ export class Line extends LeafShape {
   override get type(): string {
     return 'line';
   }
+
+  override geometrySummary(): string {
+    return `(${this.getAttribute('x1')},${this.getAttribute('y1')}) -> (${this.getAttribute('x2')},${this.getAttribute('y2')})`;
+  }
 }
